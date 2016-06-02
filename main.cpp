@@ -1,4 +1,5 @@
-#include <iostream>
+//#include <iostream>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
@@ -8,7 +9,8 @@
 
 using namespace std;
 
-struct context {
+struct context
+{
     float* values;
     float* stack;
     float* tmp;
@@ -17,7 +19,8 @@ struct context {
 };
 
 //operacja z listy wygenerowana z podanego wzoru
-struct operand {
+struct operand
+{
     char* name;
     void (*cmd)(context&);
 };
@@ -94,7 +97,8 @@ int main()
 {
     polish();
     //exit(0);
-    for (int i=0; i< ARGS; i++) {
+    for (int i=0; i< ARGS; i++)
+    {
         POPLEN += HIGH[i] - LOW[i];
     }
     POPLEN *= ARGS;
@@ -122,7 +126,8 @@ float find_min()
     clock_t t1,t2;
     float diff;
     int iter = 0;
-    do {
+    do
+    {
 
         t1 = clock();
         pv** fitness = calculate_fitness(pop, POPLEN);
@@ -134,7 +139,8 @@ float find_min()
         diff = ((float)(t2 - t1) / (CLOCKS_PER_SEC/1000) );
         elapsed += diff;
         iter ++;
-    } while (target_time - diff > elapsed);
+    }
+    while (target_time - diff > elapsed);
     float* res;
     for (int i = 0; i<POPLEN; i++)
     {
@@ -144,11 +150,12 @@ float find_min()
             res = pop[i];
         }
     }
-    cout << "ITER " << iter++ << endl;
+    //  cout << "ITER " << iter++ << endl;
 
-    cout << "MINIMUM : " << min << "DLA " << endl;
-    for (int i=0; i<ARGS; i++) {
-        cout << norm(res[i], LOW[i], HIGH[i]) << endl;
+    //cout << "MINIMUM : " << min << "DLA " << endl;
+    for (int i=0; i<ARGS; i++)
+    {
+        printf ("%f ", norm(res[i], LOW[i], HIGH[i]));
         //cout << (res[i] - LOW[i])/(HIGH[i] - LOW[i]) << endl;
     }
     return 0;
@@ -238,7 +245,7 @@ float** create_initial()
         for (int i=2; i<POPLEN; i++)
         {
             pop[i][k] = (float)rand() / RAND_MAX;
-           // cout << pop[i][k] << "\n";
+            // cout << pop[i][k] << "\n";
         }
     }
 
@@ -330,110 +337,136 @@ back:
 
 //x, y, z, a, b, c, d, e, f, g
 
-void push (context &ctx) {
+void push (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.tmp[ctx.tmp_pointer++];
 }
 
-void push_x (context &ctx) {
+void push_x (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[0];
 }
 
-void push_y (context &ctx) {
+void push_y (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[1];
 }
 
-void push_z (context &ctx) {
+void push_z (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[2];
 }
 
-void push_a (context &ctx) {
+void push_a (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[3];
 }
 
-void push_b (context &ctx) {
+void push_b (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[4];
 }
 
-void push_c (context &ctx) {
+void push_c (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[5];
 }
 
-void push_d (context &ctx) {
+void push_d (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[6];
 }
 
-void push_e (context &ctx) {
+void push_e (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[7];
 }
 
-void push_f (context &ctx) {
+void push_f (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[8];
 }
 
-void push_g (context &ctx) {
+void push_g (context &ctx)
+{
     ctx.stack[ctx.pointer++] = ctx.values[9];
 }
 
-void add_a_b (context &ctx) {
+void add_a_b (context &ctx)
+{
     ctx.stack[ctx.pointer-2] = ctx.stack[ctx.pointer-2] + ctx.stack[ctx.pointer---1];
 }
 
-void sub_a_b (context &ctx) {
+void sub_a_b (context &ctx)
+{
     ctx.stack[ctx.pointer-2] = ctx.stack[ctx.pointer-2] - ctx.stack[ctx.pointer---1];
 }
 
-void mul_a_b (context &ctx) {
+void mul_a_b (context &ctx)
+{
     ctx.stack[ctx.pointer-2] = ctx.stack[ctx.pointer-2] * ctx.stack[ctx.pointer---1];
 }
 
-void div_a_b (context &ctx) {
+void div_a_b (context &ctx)
+{
     ctx.stack[ctx.pointer-2] = ctx.stack[ctx.pointer-2] / ctx.stack[ctx.pointer---1];
 }
 
-void pow_a (context &ctx) {
+void pow_a (context &ctx)
+{
     ctx.stack[ctx.pointer-2] = powf(ctx.stack[ctx.pointer-2], ctx.stack[ctx.pointer---1]);
 }
 
-void sin_a (context &ctx) {
+void sin_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = sin(ctx.stack[ctx.pointer-1]);
 }
 
-void cos_a (context &ctx) {
+void cos_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = cos(ctx.stack[ctx.pointer-1]);
 }
 
-void push_pi (context &ctx) {
+void push_pi (context &ctx)
+{
     ctx.stack[ctx.pointer++] = M_PI;
 }
 
-void neg_a (context &ctx) {
+void neg_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = -(ctx.stack[ctx.pointer-1]);
 }
 
-void abs_a (context &ctx) {
+void abs_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = fabsf(ctx.stack[ctx.pointer-1]);
 }
 
-void sqr_a (context &ctx) {
+void sqr_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = (ctx.stack[ctx.pointer-1]) * (ctx.stack[ctx.pointer-1]);
 }
 
-void sqrt_a (context &ctx) {
+void sqrt_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = sqrtf(ctx.stack[ctx.pointer-1]);
 }
 
-void exp_a (context &ctx) {
+void exp_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = expf(ctx.stack[ctx.pointer-1]);
 }
 
-void log_a (context &ctx) {
+void log_a (context &ctx)
+{
     ctx.stack[ctx.pointer-1] = logf(ctx.stack[ctx.pointer-1]);
 }
 
 
 
 
-operand operands [25] = {
+operand operands [25] =
+{
     {
         "",
         push
@@ -540,7 +573,8 @@ operand operands [25] = {
 
 
 int olen = 25;
-void polish() {
+void polish()
+{
 //    context ctx;
     int tmp_pointer = 0;
     ctx.tmp_pointer = 0;
@@ -553,36 +587,43 @@ void polish() {
     ctx.tmp = new float[200];
     char* parts[plen]= {"x", "5", "-", "sqr", "y", "5", "-", "sqr", "+"};
     op = new operand[plen];
-    for (int i = 0; i< plen; i++) {
+    for (int i = 0; i< plen; i++)
+    {
         bool found = false;
-        for (int j = 0; j< olen; j++) {  //operands amount
-        //    cout << operands[j].name << endl;
+        for (int j = 0; j< olen; j++)    //operands amount
+        {
+            //    cout << operands[j].name << endl;
 
-            if (strcmp(operands[j].name, parts[i]) == 0) {
+            if (strcmp(operands[j].name, parts[i]) == 0)
+            {
                 op[i] = operands[j];
                 //cout << i << endl;
                 found = true;
                 break;
             }
-        }
-        if (!found) {
-        cout << "KONWERSJA" << atof(parts[i]) << endl;
-            ctx.tmp[tmp_pointer++] = atof(parts[i]);
-            op[i] = operands[0];
+            if (!found)
+            {
+                // cout << "KONWERSJA" << atof(parts[i]) << endl;
+                ctx.tmp[tmp_pointer++] = atof(parts[i]);
+                op[i] = operands[0];
+            }
         }
     }
-    for (int i=0; i<plen; i++) {
-        cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
+
+    for (int i=0; i<plen; i++)
+    {
+        //cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
         op[i].cmd(ctx);
     }
-    cout << "DUPA " << ctx.stack[0] << "\n";
 }
 
-float calculate(float* v) {
+float calculate(float* v)
+{
     ctx.pointer = 0;
     ctx.tmp_pointer = 0;
     ctx.values = v;
-    for (int i=0; i<plen; i++) {
+    for (int i=0; i<plen; i++)
+    {
         op[i].cmd(ctx);
     }
     //cout << ctx.stack[0] << endl;
