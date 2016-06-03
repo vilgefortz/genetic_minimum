@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -140,10 +140,10 @@ void read_input()
         parts[i] = (char*)malloc(sizeof *parts * 1000);
     }
     get_line();
-    //cout << line;
+    ////cout << line;
     read_word(line);
     ARGS = atoi(buffer);
-    //cout << ARGS << endl;
+    ////cout << ARGS << endl;
     read_word(line);
     target_time = atoi(buffer);
     LOW = (float*) malloc(sizeof *LOW * ARGS);
@@ -151,25 +151,25 @@ void read_input()
     for (int i = 0; i < ARGS; i++)
     {
         get_line();
-        //cout << line;
+        ////cout << line;
         read_word(line);
         LOW[i] = atof(buffer);
-        //cout << "LOW " << buffer << " = "<< LOW[i] <<endl;
+        ////cout << "LOW " << buffer << " = "<< LOW[i] <<endl;
         read_word(line);
         HIGH[i] = atof(buffer);
-        //cout << "HIGH "<< buffer << " = " << HIGH[i]<<endl;
+        ////cout << "HIGH "<< buffer << " = " << HIGH[i]<<endl;
     }
     plen = 0;
     get_line();
-    //cout << line;
+    ////cout << line;
     bool more = true;
     while (more && read_word(line)) {
         more = false;
     do
     {
-        //cout << " PARTS : " << buffer << " " << strlen(buffer) << endl;
+        ////cout << " PARTS : " << buffer << " " << strlen(buffer) << endl;
         for (int i=0 ; i < strlen(buffer); i++) {
-            //cout << "SIGN : " << (int)buffer[i];
+            ////cout << "SIGN : " << (int)buffer[i];
         }
         strcpy(parts[plen++], buffer);
     } while (read_word(line));
@@ -246,15 +246,15 @@ void find_min()
 
         t1 = clock();
         pv** fitness = calculate_fitness(pop, POPLEN);
-        //////cout << "getting parents" << endl;
+        ////////cout << "getting parents" << endl;
         float** parents = get_parents(pop, fitness);
-        //////cout << "getting children" << endl;
+        ////////cout << "getting children" << endl;
         pop = get_children(parents);
         t2 = clock();
         diff = ((float)(t2 - t1) / (CLOCKS_PER_SEC) );
         elapsed += diff;
         iter ++;
-        ////cout << "ITER " << iter << endl;
+        //////cout << "ITER " << iter << endl;
     }
     while (!finished && (target_time - diff) > elapsed);
     float* res;
@@ -303,7 +303,7 @@ float** get_parents(float** pop, pv** fitness)
     {
         value_fitness[i] = (pv*)malloc(sizeof **value_fitness);
         //    value_fitness[i] = new pv;
-        uses[i] = 0;
+       // uses[i] = 0;
         fitnessD[i] = fitness[i]->fit + fitnessD[i - 1];
     }
     float sum = fitnessD[POPLEN-1];
@@ -343,7 +343,7 @@ float** create_initial()
         for (int i=2; i<POPLEN; i++)
         {
             pop[i][k] = (float)rand() / RAND_MAX;
-            //cout << pop[i][k] << "\n";
+            ////cout << pop[i][k] << "\n";
         }
     }
 
@@ -381,7 +381,7 @@ float** get_children(float** parents)
 {
     para* pairs = (para*)malloc(sizeof *pairs * POPLEN/2);
     if (pairs == NULL) {
-        cout << "MALLOC ERROR";
+        //cout << "MALLOC ERROR";
         exit(0);
     }
     int c = 0;
@@ -411,13 +411,13 @@ float** get_children(float** parents)
     }
     float** cvals = children;
     //pv* ch = new pv[c];
-    //////cout << "SIIIZE " << c << "\n";
+    ////////cout << "SIIIZE " << c << "\n";
     for (int k = 0; k< ARGS; k++)
     {
         for (int i = 0; i < POPLEN/2; i++)
         {
-            //  ////cout << i << " "<< pairs[i].a;
-            // ////cout << " " << pairs[i].b << "\n";
+            //  //////cout << i << " "<< pairs[i].a;
+            // //////cout << " " << pairs[i].b << "\n";
 back:
             u maska,maskb,x,y,q,p;
             int width = rand() % 32;
@@ -546,14 +546,14 @@ void neg_a (context &ctx)
 
 void abs_a (context &ctx)
 {
-    //cout << ctx.stack[ctx.pointer-1] << " ";
+    ////cout << ctx.stack[ctx.pointer-1] << " ";
     ctx.stack[ctx.pointer-1] = fabsf(ctx.stack[ctx.pointer-1]);
-    //cout << fabsf(ctx.stack[ctx.pointer-1]) << " ";
+    ////cout << fabsf(ctx.stack[ctx.pointer-1]) << " ";
 }
 
 void sqr_a (context &ctx)
 {
-    //////cout << "POWERING VALUE " << ctx.stack[ctx.pointer-1] << endl;
+    ////////cout << "POWERING VALUE " << ctx.stack[ctx.pointer-1] << endl;
     ctx.stack[ctx.pointer-1] = (ctx.stack[ctx.pointer-1]) * (ctx.stack[ctx.pointer-1]);
 }
 
@@ -701,30 +701,30 @@ void polish()
         bool found = false;
         for (int j = 0; j< olen; j++)    //operands amount
         {
-            //    ////cout << operands[j].name << endl;
+            //    //////cout << operands[j].name << endl;
 
             if (strcmp(operands[j].name, parts[i]) == 0)
             {
                 op[i] = operands[j];
-                cout << op[i].name << endl << flush;
+                //cout << op[i].name << endl << flush;
                 found = true;
                 break;
             }
         }
         if (!found)
         {
-            ////cout << "KONWERSJA" << parts[i] << " = " << atof(parts[i]) << endl;
+            //////cout << "KONWERSJA" << parts[i] << " = " << atof(parts[i]) << endl;
             ctx.tmp[tmp_pointer++] = atof(parts[i]);
-            cout << "NUM :" << atof(parts[i]) << endl;
+            //cout << "NUM :" << atof(parts[i]) << endl;
             op[i] = operands[0];
-            cout << op[i].name << endl  << flush;
+            //cout << op[i].name << endl  << flush;
         }
     }
 
     for (int i=0; i<plen; i++)
     {
         op[i].cmd(ctx);
-        ////cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
+        //////cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
     }
 }
 
@@ -737,7 +737,7 @@ float calculate(float* v)
     {
         op[i].cmd(ctx);
     }
-    //  ////cout << ctx.stack[0] << endl;
+    //  //////cout << ctx.stack[0] << endl;
     return ctx.stack[0];
 }
 
