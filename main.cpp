@@ -34,7 +34,7 @@ int plen = 0;
 //potrzebne do bitowego przesuwania floata
 typedef union
 {
-    int i;
+    long i;
     float f;
 } u;
 
@@ -67,7 +67,7 @@ float** create_initial();
 pv** calculate_fitness(float**, int);
 float** get_parents(float**, pv**);
 float** get_children(float**);
-float* normalized = new float[ARGS];
+float* normalized = (float*)malloc (sizeof *normalized * POPLEN);
 
 float space(float* x)
 {
@@ -103,15 +103,15 @@ int main()
     }
     POPLEN *= ARGS;
     if (POPLEN<100) POPLEN = 100;
-    tmpparents = new float*[POPLEN];
-    parents = new float*[POPLEN];
-    children = new float*[POPLEN];
+    tmpparents = (float**) malloc (sizeof *tmpparents * POPLEN) ;
+    parents = (float**) malloc (sizeof *parents * POPLEN) ;
+    children = (float**) malloc (sizeof *children * POPLEN) ;
     srand(time(NULL));
     for (int i=0; i<POPLEN; i++)
     {
-        tmpparents[i] = new float[ARGS];
-        parents[i] = new float[ARGS];
-        children[i] = new float[ARGS];
+        tmpparents[i] = (float*) malloc (sizeof **tmpparents * ARGS) ;
+        parents[i] = (float*) malloc (sizeof **parents * ARGS) ;
+        children[i] = (float*) malloc (sizeof **children * ARGS) ;
     }
     float min = find_min();
 
@@ -131,14 +131,15 @@ float find_min()
 
         t1 = clock();
         pv** fitness = calculate_fitness(pop, POPLEN);
-        //cout << "getting parents" << endl;
+        ////cout << "getting parents" << endl;
         float** parents = get_parents(pop, fitness);
-        //cout << "getting children" << endl;
+        ////cout << "getting children" << endl;
         pop = get_children(parents);
         t2 = clock();
         diff = ((float)(t2 - t1) / (CLOCKS_PER_SEC/1000) );
         elapsed += diff;
         iter ++;
+        //cout << "ITER " << iter << endl;
     }
     while (target_time - diff > elapsed);
     float* res;
@@ -150,13 +151,13 @@ float find_min()
             res = pop[i];
         }
     }
-    //  cout << "ITER " << iter++ << endl;
+    //  //cout << "ITER " << iter++ << endl;
 
-    //cout << "MINIMUM : " << min << "DLA " << endl;
+    ////cout << "MINIMUM : " << min << "DLA " << endl;
     for (int i=0; i<ARGS; i++)
     {
         printf ("%f ", norm(res[i], LOW[i], HIGH[i]));
-        //cout << (res[i] - LOW[i])/(HIGH[i] - LOW[i]) << endl;
+        ////cout << (res[i] - LOW[i])/(HIGH[i] - LOW[i]) << endl;
     }
     return 0;
 }
@@ -179,15 +180,17 @@ float** get_parents(float** pop, pv** fitness)
     //uzycia parentow na poszcegolnych indeksach
     int uses[POPLEN];
     float fitnessD[POPLEN];
-    pv** value_fitness = new pv*[POPLEN];
+    pv** value_fitness;
+    value_fitness = (pv**)malloc (sizeof *value_fitness * POPLEN);
     uses[0] = 0;
     fitnessD[0] = fitness[0]->fit;
-    value_fitness[0] = new pv;
+    value_fitness[0] = (pv*)malloc(sizeof **value_fitness);
 
     //przygotowanie zmiennych
     for (int i = 1; i < POPLEN; i++)
     {
-        value_fitness[i] = new pv;
+        value_fitness[i] = (pv*)malloc(sizeof **value_fitness);
+        //    value_fitness[i] = new pv;
         uses[i] = 0;
         fitnessD[i] = fitness[i]->fit + fitnessD[i - 1];
     }
@@ -229,6 +232,7 @@ float** get_parents(float** pop, pv** fitness)
     qsort(value_fitness, POPLEN ,sizeof value_fitness, cmp_pv);
     for (int i = 0; i < POPLEN; i++)
     {
+        //cout << "PARENT + FITNESS   " << parents[i][0] << " : " << value_fitness[i]->fit << endl;
         parents[i] = value_fitness[i]->val;
     }
     return parents;
@@ -240,12 +244,12 @@ float** create_initial()
     float** pop = parents;
     for (int k = 0 ; k < ARGS; k++)
     {
-        pop[k][0] = 0;
-        pop[k][1] = 1;
+        pop[0][k] = 0;
+        pop[1][k] = 1;
         for (int i=2; i<POPLEN; i++)
         {
             pop[i][k] = (float)rand() / RAND_MAX;
-            // cout << pop[i][k] << "\n";
+            //cout << pop[i][k] << "\n";
         }
     }
 
@@ -254,12 +258,13 @@ float** create_initial()
 
 pv** calculate_fitness(float** pop, int len)
 {
-    pv** fitness = new pv*[len];
+    pv** fitness;
+    fitness = (pv**)malloc (sizeof *fitness * len);
     float abssum = 0;
     float sum = 0;
     for (int i = 0; i < len; i++)
     {
-        fitness[i] = new pv;
+        fitness[i] = (pv*)malloc(sizeof **fitness);
         abssum += fabsf(space_norm(pop[i]));
         sum += space_norm(pop[i]);
     }
@@ -275,12 +280,12 @@ pv** calculate_fitness(float** pop, int len)
 
 int mutate (int f)
 {
-    return (float)rand()/RAND_MAX < 0.3? f xor (1 << rand() % 23) : f;
+    return (float)rand()/RAND_MAX < 0.1? f xor (1 << rand() % 23) : f;
 }
 
 float** get_children(float** parents)
 {
-    para* pairs = new para[POPLEN/2];
+    para* pairs = (para*)malloc(sizeof *pairs * POPLEN/2);
     int c = 0;
     for (int i = 0; i < POPLEN - 1; i++)
     {
@@ -304,13 +309,13 @@ float** get_children(float** parents)
     }
     float** cvals = children;
     //pv* ch = new pv[c];
-    //cout << "SIIIZE " << c << "\n";
+    ////cout << "SIIIZE " << c << "\n";
     for (int k = 0; k< ARGS; k++)
     {
         for (int i = 0; i < POPLEN/2; i++)
         {
-            //  cout << i << " "<< pairs[i].a;
-            // cout << " " << pairs[i].b << "\n";
+            //  //cout << i << " "<< pairs[i].a;
+            // //cout << " " << pairs[i].b << "\n";
 back:
             u maska,maskb,x,y,q,p;
             int width = rand() % 32;
@@ -330,7 +335,7 @@ back:
             cvals[i*2 + 1][k] = q.f;
         }
     }
-    delete pairs;
+    free(pairs);
     return cvals;
 }
 
@@ -444,6 +449,7 @@ void abs_a (context &ctx)
 
 void sqr_a (context &ctx)
 {
+    ////cout << "POWERING VALUE " << ctx.stack[ctx.pointer-1] << endl;
     ctx.stack[ctx.pointer-1] = (ctx.stack[ctx.pointer-1]) * (ctx.stack[ctx.pointer-1]);
 }
 
@@ -579,20 +585,34 @@ void polish()
     int tmp_pointer = 0;
     ctx.tmp_pointer = 0;
     ctx.pointer = 0;
-    ctx.values = new float[10];
-    ctx.values[0] = 1.0;
-    ctx.values[1] = 3.0;
+    ctx.values = (float*) malloc(sizeof *(ctx.values) * 10);
+    ctx.values[0] = 5;
+    ctx.values[1] = 6;
     plen = 9;
-    ctx.stack = new float[200];
-    ctx.tmp = new float[200];
-    char* parts[plen]= {"x", "5", "-", "sqr", "y", "5", "-", "sqr", "+"};
-    op = new operand[plen];
+    ctx.stack = (float*) malloc(sizeof *(ctx.stack) * 200);
+    ctx.tmp = (float*) malloc(sizeof *(ctx.tmp) * 200);
+    //char* parts[plen] = (char**) malloc (sizeof **parts * plen);
+    char* parts[plen];
+    parts[0] = "x";
+    parts[1] =  "5";
+    parts[2] =  "-";
+    parts[3] =  "sqr";
+    parts[4] =  "y";
+    parts[5] =  "5";
+    parts[6] =  "-";
+    parts[7] =  "sqr";
+    parts[8] =  "+";
+
+    //, "-", "sqr", "y", "5", "-", "sqr", "+"};
+    // for (int i=0; i< plen; i++) {
+
+    op = (operand*)malloc(sizeof(*op) * plen);
     for (int i = 0; i< plen; i++)
     {
         bool found = false;
         for (int j = 0; j< olen; j++)    //operands amount
         {
-            //    cout << operands[j].name << endl;
+            //    //cout << operands[j].name << endl;
 
             if (strcmp(operands[j].name, parts[i]) == 0)
             {
@@ -601,19 +621,20 @@ void polish()
                 found = true;
                 break;
             }
-            if (!found)
-            {
-                // cout << "KONWERSJA" << atof(parts[i]) << endl;
-                ctx.tmp[tmp_pointer++] = atof(parts[i]);
-                op[i] = operands[0];
-            }
+        }
+        if (!found)
+        {
+            //cout << "KONWERSJA" << parts[i] << " = " << atof(parts[i]) << endl;
+            ctx.tmp[tmp_pointer++] = atof(parts[i]);
+            op[i] = operands[0];
         }
     }
 
     for (int i=0; i<plen; i++)
     {
-        //cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
+
         op[i].cmd(ctx);
+        //cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
     }
 }
 
@@ -626,7 +647,7 @@ float calculate(float* v)
     {
         op[i].cmd(ctx);
     }
-    //cout << ctx.stack[0] << endl;
+    //  //cout << ctx.stack[0] << endl;
     return ctx.stack[0];
 }
 
