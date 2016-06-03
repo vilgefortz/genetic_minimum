@@ -1,0 +1,10 @@
+# Rastrigin function
+# fmin(0, 0, 0) = 0
+3 4
+-5.12 5.12
+-5.12 5.12
+-5.12 5.12
+x sqr 10 2 pi * x * cos * - 10 +
+y sqr 10 2 pi * y * cos * - 10 +
+z sqr 10 2 pi * z * cos * - 10 +
++ +

@@ -1,0 +1,8 @@
+# Styblinski-Tang function
+# fmin(-2.903534, -2.903534) = -78.332
+2 4
+-5 5
+-5 5
+x 4 pow 16 x sqr * - 5 x * +
+y 4 pow 16 y sqr * - 5 y * +
++ 0.5 *

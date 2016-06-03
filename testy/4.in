@@ -1,0 +1,12 @@
+# Schwefel's problem
+# fmin(420.969, ..., 420,969) = -1675.931549
+4 4
+-500 500
+-500 500
+-500 500
+-500 500
+x x abs sqrt sin *
+y y abs sqrt sin *
+z z abs sqrt sin *
+a a abs sqrt sin *
++ + + neg

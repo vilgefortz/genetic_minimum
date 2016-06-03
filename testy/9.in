@@ -1,0 +1,27 @@
+# Ackley function
+# fmin(0, ..., 0) = 0
+10 10
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+-32.768 32.768
+x sqr y sqr + z sqr + a sqr + b sqr + c sqr + d sqr + e sqr + f sqr + g sqr +
+10 / sqrt -0.2 *
+exp -20 *
+2 pi x * * cos
+2 pi y * * cos
+2 pi z * * cos
+2 pi a * * cos
+2 pi b * * cos
+2 pi c * * cos
+2 pi d * * cos
+2 pi e * * cos
+2 pi f * * cos
+2 pi g * * cos + + + + + + + + +
+10 / exp - 20 + 1 exp +

@@ -1,0 +1,6 @@
+# Zettle function
+# fmin(-0.0299, 0) = -0.003791
+2 4
+-5 5
+-5 5
+x sqr y sqr + 2 x * - sqr 0.25 x * +

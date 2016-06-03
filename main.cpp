@@ -1,4 +1,4 @@
-//#include <iostream>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -6,6 +6,7 @@
 #include <float.h>
 #include <time.h>
 #include <string.h>
+#include <stropts.h>
 
 using namespace std;
 
@@ -28,7 +29,7 @@ struct operand
 
 
 context ctx;
-
+bool finished = false;
 operand* op;
 int plen = 0;
 //potrzebne do bitowego przesuwania floata
@@ -44,7 +45,7 @@ struct pv
     float fit; //przystoowanie
 };
 
-struct para //reprezentuje pare rodzicow
+struct para //repreze ntuje pare rodzicow
 {
     float* a;
     float* b;
@@ -54,9 +55,9 @@ float target_time = 1000; //ms
 int ARGS = 1;
 
 int POPLEN = 0;
-float LOW[2] = { 0, 0 };
-float HIGH[2] = { 10, 10 };
-float find_min();
+float* LOW;
+float* HIGH;
+void find_min();
 
 float** parents;
 float** children;
@@ -68,6 +69,117 @@ pv** calculate_fitness(float**, int);
 float** get_parents(float**, pv**);
 float** get_children(float**);
 float* normalized = (float*)malloc (sizeof *normalized * POPLEN);
+char* main_buffer;
+char* buffer;
+char* line;
+char** parts;
+size_t size = 999;
+
+int t_start=0;
+int t_len=0;
+
+char* sub_string (const char* input, int offset, int len, char* dest)
+{
+    int input_len = strlen (input);
+
+    if (offset + len > input_len)
+    {
+        return NULL;
+    }
+
+    strncpy (dest, input + offset, len);
+    dest[len] = '\0';
+    return dest;
+}
+
+bool read_word(char* line)
+{
+    while (line[t_start] != '\n' && line[t_start] != '\r')
+    {
+        if (line[t_start] == ' ' || line[t_start] == '\t')
+        {
+            t_start++;
+            continue;
+        }
+        else
+        {
+            break;
+        }
+    }
+    if (line[t_start] == '\n' || line[t_start] == '\0' || line[t_start] == '\r')
+    {
+        t_start = 0;
+        t_len = 0;
+        return false;
+    }
+    while (line[t_start + t_len] != ' ' && line[t_start + t_len] != '\n' && line[t_start + t_len] != '\t' && line[t_start] != '\0' && line[t_start + t_len] != '\r')
+    {
+        t_len++;
+    }
+    sub_string(line, t_start, t_len, buffer);
+    t_start = t_start + t_len;
+    t_len = 0;
+    return true;
+}
+
+void get_line() {
+    t_start=0;
+    t_len=0;
+    do {
+        getline(&line, &size, stdin);
+    } while (line[0] == '#');
+}
+
+void read_input()
+{
+    buffer = (char*)malloc(sizeof *buffer * 1000);
+    line = (char*)malloc(sizeof *line * 50000);
+    parts = (char**)malloc(sizeof **parts * 300);
+    for (int i = 0; i< 300; i++)
+    {
+        parts[i] = (char*)malloc(sizeof *parts * 1000);
+    }
+    get_line();
+    //cout << line;
+    read_word(line);
+    ARGS = atoi(buffer);
+    //cout << ARGS << endl;
+    read_word(line);
+    target_time = atoi(buffer);
+    LOW = (float*) malloc(sizeof *LOW * ARGS);
+    HIGH = (float*) malloc(sizeof *LOW * ARGS);
+    for (int i = 0; i < ARGS; i++)
+    {
+        get_line();
+        //cout << line;
+        read_word(line);
+        LOW[i] = atof(buffer);
+        //cout << "LOW " << buffer << " = "<< LOW[i] <<endl;
+        read_word(line);
+        HIGH[i] = atof(buffer);
+        //cout << "HIGH "<< buffer << " = " << HIGH[i]<<endl;
+    }
+    plen = 0;
+    get_line();
+    //cout << line;
+    bool more = true;
+    while (more && read_word(line)) {
+        more = false;
+    do
+    {
+        //cout << " PARTS : " << buffer << " " << strlen(buffer) << endl;
+        for (int i=0 ; i < strlen(buffer); i++) {
+            //cout << "SIGN : " << (int)buffer[i];
+        }
+        strcpy(parts[plen++], buffer);
+    } while (read_word(line));
+    if (!feof(stdin)) {
+        get_line();
+        more = true;
+    }
+    }
+    //exit (1);
+}
 
 float space(float* x)
 {
@@ -95,6 +207,7 @@ float space_norm(float* i)
 void polish();
 int main()
 {
+    read_input();
     polish();
     //exit(0);
     for (int i=0; i< ARGS; i++)
@@ -102,7 +215,9 @@ int main()
         POPLEN += HIGH[i] - LOW[i];
     }
     POPLEN *= ARGS;
-    if (POPLEN<100) POPLEN = 100;
+    //if (POPLEN < 100) POPLEN = 100;
+    //if (POPLEN > 2000)
+    POPLEN = 2000;
     tmpparents = (float**) malloc (sizeof *tmpparents * POPLEN) ;
     parents = (float**) malloc (sizeof *parents * POPLEN) ;
     children = (float**) malloc (sizeof *children * POPLEN) ;
@@ -113,11 +228,11 @@ int main()
         parents[i] = (float*) malloc (sizeof **parents * ARGS) ;
         children[i] = (float*) malloc (sizeof **children * ARGS) ;
     }
-    float min = find_min();
+    find_min();
 
 }
 
-float find_min()
+void find_min()
 {
     float min = FLT_MAX;
     float val = 0;
@@ -131,17 +246,17 @@ float find_min()
 
         t1 = clock();
         pv** fitness = calculate_fitness(pop, POPLEN);
-        ////cout << "getting parents" << endl;
+        //////cout << "getting parents" << endl;
         float** parents = get_parents(pop, fitness);
-        ////cout << "getting children" << endl;
+        //////cout << "getting children" << endl;
         pop = get_children(parents);
         t2 = clock();
-        diff = ((float)(t2 - t1) / (CLOCKS_PER_SEC/1000) );
+        diff = ((float)(t2 - t1) / (CLOCKS_PER_SEC) );
         elapsed += diff;
         iter ++;
-        //cout << "ITER " << iter << endl;
+        ////cout << "ITER " << iter << endl;
     }
-    while (target_time - diff > elapsed);
+    while (!finished && (target_time - diff) > elapsed);
     float* res;
     for (int i = 0; i<POPLEN; i++)
     {
@@ -151,15 +266,12 @@ float find_min()
             res = pop[i];
         }
     }
-    //  //cout << "ITER " << iter++ << endl;
-
-    ////cout << "MINIMUM : " << min << "DLA " << endl;
     for (int i=0; i<ARGS; i++)
     {
         printf ("%f ", norm(res[i], LOW[i], HIGH[i]));
-        ////cout << (res[i] - LOW[i])/(HIGH[i] - LOW[i]) << endl;
     }
-    return 0;
+    printf("\n%d", iter);
+
 }
 
 int sgn (float x)
@@ -178,11 +290,11 @@ float** get_parents(float** pop, pv** fitness)
     //float** parents = new float[POPLEN];
 
     //uzycia parentow na poszcegolnych indeksach
-    int uses[POPLEN];
+    //int uses[POPLEN];
     float fitnessD[POPLEN];
     pv** value_fitness;
     value_fitness = (pv**)malloc (sizeof *value_fitness * POPLEN);
-    uses[0] = 0;
+    //uses[0] = 0;
     fitnessD[0] = fitness[0]->fit;
     value_fitness[0] = (pv*)malloc(sizeof **value_fitness);
 
@@ -195,44 +307,26 @@ float** get_parents(float** pop, pv** fitness)
         fitnessD[i] = fitness[i]->fit + fitnessD[i - 1];
     }
     float sum = fitnessD[POPLEN-1];
-    bool doubles;
     for (int i = 0; i < POPLEN; i++)
     {
-        do
-        {
-            doubles = false;
             float roulette = (float)rand()/RAND_MAX * sum;
-            bool found = false;
+           // found = false;
             value_fitness[i]->val = pop[0];
             value_fitness[i]->fit = fitness[0]->fit;
             for (int j = 1; j < POPLEN; j++)
             {
                 if (fitnessD[j - 1] <= roulette && roulette < fitnessD[j])
                 {
-                    if (doubles = (uses[j] > 1))
-                        break;
                     value_fitness[i]->val = pop[j];
                     value_fitness[i]->fit = fitness[j]->fit;
-                    found = true;
-                    uses[j]++;
                     break;
                 }
             }
-            if (!found && !doubles)
-            {
-                if (uses[0] > 1)
-                    doubles = true;
-                else
-                    uses[0]++;
-            }
-        }
-        while (doubles);
     }
 
     qsort(value_fitness, POPLEN ,sizeof value_fitness, cmp_pv);
     for (int i = 0; i < POPLEN; i++)
     {
-        //cout << "PARENT + FITNESS   " << parents[i][0] << " : " << value_fitness[i]->fit << endl;
         parents[i] = value_fitness[i]->val;
     }
     return parents;
@@ -280,12 +374,16 @@ pv** calculate_fitness(float** pop, int len)
 
 int mutate (int f)
 {
-    return (float)rand()/RAND_MAX < 0.1? f xor (1 << rand() % 23) : f;
+    return (float)rand()/RAND_MAX < 0.2? f xor (1 << rand() % 23) : f;
 }
 
 float** get_children(float** parents)
 {
     para* pairs = (para*)malloc(sizeof *pairs * POPLEN/2);
+    if (pairs == NULL) {
+        cout << "MALLOC ERROR";
+        exit(0);
+    }
     int c = 0;
     for (int i = 0; i < POPLEN - 1; i++)
     {
@@ -307,15 +405,19 @@ float** get_children(float** parents)
             c++;
         }
     }
+    if (c < POPLEN/2) {
+        finished = true;
+        return parents;
+    }
     float** cvals = children;
     //pv* ch = new pv[c];
-    ////cout << "SIIIZE " << c << "\n";
+    //////cout << "SIIIZE " << c << "\n";
     for (int k = 0; k< ARGS; k++)
     {
         for (int i = 0; i < POPLEN/2; i++)
         {
-            //  //cout << i << " "<< pairs[i].a;
-            // //cout << " " << pairs[i].b << "\n";
+            //  ////cout << i << " "<< pairs[i].a;
+            // ////cout << " " << pairs[i].b << "\n";
 back:
             u maska,maskb,x,y,q,p;
             int width = rand() % 32;
@@ -444,12 +546,14 @@ void neg_a (context &ctx)
 
 void abs_a (context &ctx)
 {
+    //cout << ctx.stack[ctx.pointer-1] << " ";
     ctx.stack[ctx.pointer-1] = fabsf(ctx.stack[ctx.pointer-1]);
+    //cout << fabsf(ctx.stack[ctx.pointer-1]) << " ";
 }
 
 void sqr_a (context &ctx)
 {
-    ////cout << "POWERING VALUE " << ctx.stack[ctx.pointer-1] << endl;
+    //////cout << "POWERING VALUE " << ctx.stack[ctx.pointer-1] << endl;
     ctx.stack[ctx.pointer-1] = (ctx.stack[ctx.pointer-1]) * (ctx.stack[ctx.pointer-1]);
 }
 
@@ -588,53 +692,39 @@ void polish()
     ctx.values = (float*) malloc(sizeof *(ctx.values) * 10);
     ctx.values[0] = 5;
     ctx.values[1] = 6;
-    plen = 9;
+    //plen = 9;
     ctx.stack = (float*) malloc(sizeof *(ctx.stack) * 200);
     ctx.tmp = (float*) malloc(sizeof *(ctx.tmp) * 200);
-    //char* parts[plen] = (char**) malloc (sizeof **parts * plen);
-    char* parts[plen];
-    parts[0] = "x";
-    parts[1] =  "5";
-    parts[2] =  "-";
-    parts[3] =  "sqr";
-    parts[4] =  "y";
-    parts[5] =  "5";
-    parts[6] =  "-";
-    parts[7] =  "sqr";
-    parts[8] =  "+";
-
-    //, "-", "sqr", "y", "5", "-", "sqr", "+"};
-    // for (int i=0; i< plen; i++) {
-
     op = (operand*)malloc(sizeof(*op) * plen);
     for (int i = 0; i< plen; i++)
     {
         bool found = false;
         for (int j = 0; j< olen; j++)    //operands amount
         {
-            //    //cout << operands[j].name << endl;
+            //    ////cout << operands[j].name << endl;
 
             if (strcmp(operands[j].name, parts[i]) == 0)
             {
                 op[i] = operands[j];
-                //cout << i << endl;
+                cout << op[i].name << endl << flush;
                 found = true;
                 break;
             }
         }
         if (!found)
         {
-            //cout << "KONWERSJA" << parts[i] << " = " << atof(parts[i]) << endl;
+            ////cout << "KONWERSJA" << parts[i] << " = " << atof(parts[i]) << endl;
             ctx.tmp[tmp_pointer++] = atof(parts[i]);
+            cout << "NUM :" << atof(parts[i]) << endl;
             op[i] = operands[0];
+            cout << op[i].name << endl  << flush;
         }
     }
 
     for (int i=0; i<plen; i++)
     {
-
         op[i].cmd(ctx);
-        //cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
+        ////cout << op[i].name << " "<< ctx.stack[0] << " " <<  ctx.stack[1] << "\n";
     }
 }
 
@@ -647,9 +737,10 @@ float calculate(float* v)
     {
         op[i].cmd(ctx);
     }
-    //  //cout << ctx.stack[0] << endl;
+    //  ////cout << ctx.stack[0] << endl;
     return ctx.stack[0];
 }
+
 
 
 
